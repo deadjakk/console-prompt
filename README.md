@@ -15,7 +15,7 @@ fn main(){
     let commands = vec![
         Command{
             command: "converse",
-            func: converse,
+            func: converse, // <---- pointer to the converse function
             help_output: "converse <name> - interact with a person"
         },
     ];
