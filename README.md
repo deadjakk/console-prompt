@@ -10,7 +10,7 @@ Running example:
 
 Creating a prompt is as simple as creating a vector of `Command` structs with pointers to your functions and handing them off to `command_loop`:
 
-```
+```rust
 fn main(){
     let commands = vec![
         Command{
