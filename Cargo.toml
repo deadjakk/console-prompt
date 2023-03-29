@@ -1,0 +1,21 @@
+[package]
+name = "console_prompt"
+repository = "https://github.com/deadjakk/console_prompt"
+version = "0.1.0"
+edition = "2021"
+keywords = ["cli", "prompt", "toolkit"]
+authors = ["Jonathan Peterson @deadjakk"]
+categories = ["command-line-interface", "command-line-utilities"]
+license-file = "LICENSE"
+description = "console_prompt is a very simple library for creating clean, thread-safe cli prompts for interactive cli programs in rust heavily relying on crossterm. I created this for a C2 client, but it could likely be used in anywhere you want an interactive prompt. The simplicity of it is what I think sets it apart from other projects"
+
+[lib]
+name = "console_prompt"
+path = "src/lib.rs"
+
+[[example]]
+name = "conversation"
+
+[dependencies]
+crossterm = "0.26.1"
+rustyline = "10.0.0"
