@@ -11,6 +11,7 @@ use std::fmt;
 use std::io;
 use std::io::Write;
 use rustyline::error::ReadlineError;
+use std::any::Any;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct SetScrollingRegion(pub u16, pub u16);
@@ -66,7 +67,7 @@ impl ctCommand for SetScrollingAll {
 /// Runs the actual command loop, providing readline output via rustyline.
 /// The context arg allows for the passing of additional 'context' information
 /// to maintain a state during subcalls if needed.
-pub fn command_loop(commands: &Vec<Command>, context: Option<&[&str]>) -> Result<(), Box<dyn Error>>{
+pub fn command_loop(commands: &Vec<Command>, context: Option<&Box<dyn Any>>) -> Result<(), Box<dyn Error>>{
     setup_screen()?;
 
     println!("info: type 'help' to for a list of commands");
@@ -167,6 +168,6 @@ pub fn setup_screen()->Result<(),Box<dyn Error>>{
 
 pub struct Command<'r> {
     pub command: &'r str,
-    pub func: fn(&[&str], Option<&[&str]>)->Result<String,Box<dyn Error>>,
+    pub func: fn(&[&str], Option<&Box<dyn Any>>)->Result<String,Box<dyn Error>>,
     pub help_output: &'r str,
 }

@@ -1,6 +1,6 @@
 [package]
 name = "console-prompt"
-repository = "https://github.com/deadjakk/console_prompt"
+repository = "https://github.com/deadjakk/console-prompt"
 version = "0.1.0"
 edition = "2021"
 keywords = ["cli", "prompt", "toolkit"]
