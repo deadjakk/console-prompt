@@ -13,6 +13,28 @@ use std::io::Write;
 use rustyline::error::ReadlineError;
 use std::any::Any;
 
+pub struct DynamicContext {
+    value: Option<Box<dyn Any>>,
+}
+
+impl DynamicContext {
+    pub fn new() -> Self {
+        DynamicContext { value: None }
+    }
+
+    pub fn set<T: 'static>(&mut self, value: T) {
+        self.value = Some(Box::new(value));
+    }
+
+    pub fn get<T: 'static>(&self) -> Option<&T> {
+        self.value.as_ref().and_then(|v| v.downcast_ref::<T>())
+    }
+
+    pub fn get_mut<T: 'static>(&mut self) -> Option<&mut T> {
+        self.value.as_mut().and_then(|v| v.downcast_mut::<T>())
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct SetScrollingRegion(pub u16, pub u16);
 
@@ -67,7 +89,7 @@ impl ctCommand for SetScrollingAll {
 /// Runs the actual command loop, providing readline output via rustyline.
 /// The context arg allows for the passing of additional 'context' information
 /// to maintain a state during subcalls if needed.
-pub fn command_loop(commands: &Vec<Command>, context: &mut Option<Box<dyn Any>>) -> Result<(), Box<dyn Error>>{
+pub fn command_loop(commands: &Vec<Command>, context: &mut DynamicContext) -> Result<(), Box<dyn Error>>{
     setup_screen()?;
 
     println!("info: type 'help' to for a list of commands");
@@ -168,6 +190,6 @@ pub fn setup_screen()->Result<(),Box<dyn Error>>{
 
 pub struct Command<'r> {
     pub command: &'r str,
-    pub func: fn(&[&str], &mut Option<Box<dyn Any>>)->Result<String, Box<dyn Error>>,
+    pub func: fn(&[&str], &mut DynamicContext)->Result<String, Box<dyn Error>>,
     pub help_output: &'r str,
 }

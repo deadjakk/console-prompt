@@ -1,4 +1,4 @@
-use console_prompt::{Command, command_loop};
+use console_prompt::{Command, command_loop, DynamicContext};
 use std::error::Error;
 use std::any::Any;
 
@@ -11,34 +11,30 @@ fn no(_args: &[&str], _context: Option<&Box<dyn Any>>)->Result<String, Box<dyn E
 }
 
 
-fn change(_args: &[&str], context: &mut Option<Box<dyn Any>>)->Result<String, Box<dyn Error>>{
-    match context {
-        None => { return Ok("you are not in a conversation with a person".to_string()) },
-        Some(data) => {
-            if let Some(name_val) = data.downcast_mut::<String>(){
-                *name_val = _args[0].to_string();
-            }
-            if let Some(name) = data.downcast_ref::<String>(){
-                return Ok(format!("You changed their name to {name}"));
-            } 
-            return Ok(format!("You could not get a name to change"));
-        }
+fn change(_args: &[&str], context: &mut DynamicContext)->Result<String, Box<dyn Error>>{
+    match context.get_mut::<String>() {
+        Some(mut_ref) => {
+            *mut_ref = _args[0].to_string();
+            return Ok(format!("you changed their name to {}", *mut_ref));
+        },
+        None => return Ok("you are not in a conversation with a person".to_string()),
     }
 }
 
-fn hello(_args: &[&str], context: &mut Option<Box<dyn Any>>)->Result<String, Box<dyn Error>>{
-    match context {
-        None => { return Ok("you are not in a conversation with a person".to_string()) },
-        Some(data) => {
-            let name_op = data.downcast_ref::<String>();
-            return Ok(format!("You said hello to {} I guess", name_op.unwrap() ));
+fn hello(_args: &[&str], context: &mut DynamicContext)->Result<String, Box<dyn Error>>{
+    match context.get::<String>() {
+        None => { 
+            return Ok("you are not in a conversation with a person".to_string()) 
+        },
+        Some(name ) => {
+            return Ok(format!("You said hello to {name} I guess"));
         }
     }
 }
 
 // test function that demonstrates calling a command_loop sub call
 // to provide a nested state
-fn converse(args: &[&str], _context: &mut Option<Box<dyn Any>>)->Result<String, Box<dyn Error>>{
+fn converse(args: &[&str], _context: &mut DynamicContext)->Result<String, Box<dyn Error>>{
     if args.len() == 0 {
         return Ok("no name provided".to_string());
     }
@@ -50,10 +46,12 @@ fn converse(args: &[&str], _context: &mut Option<Box<dyn Any>>)->Result<String, 
         //Command{command: "no", func: no, help_output: "no - reply no"},
     ];
 
-    let mut name: Option<Box<dyn Any>> = Some(Box::new(args[0].to_string()));
+    // let mut name: Option<Box<dyn Any>> = Some(Box::new(args[0].to_string()));
+    let mut context = DynamicContext::new();
+    context.set(args[0].to_string());
     // passing the arguments for the converse commands as context
     // to the commands in the next command loop for reference
-    if let Err(e) = command_loop(&commands, &mut name){
+    if let Err(e) = command_loop(&commands, &mut context){
         eprintln!("error running interact command loop: {}", e);
     }
     Ok(String::new())
@@ -69,7 +67,7 @@ fn main(){
     ];
 
     // start the command loop with the provided commands
-    if let Err(e) = command_loop(&commands, &mut None){
+    if let Err(e) = command_loop(&commands, &mut DynamicContext::new()){
         eprintln!("error running command loop: {}", e.to_string());
     }
 }
