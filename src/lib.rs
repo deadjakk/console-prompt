@@ -12,28 +12,36 @@ use std::io;
 use std::io::Write;
 use rustyline::error::ReadlineError;
 use std::any::Any;
+use std::collections::HashMap;
 
 pub struct DynamicContext {
-    value: Option<Box<dyn Any>>,
+    values: HashMap<String, Box<dyn Any>>,
 }
 
 impl DynamicContext {
     pub fn new() -> Self {
-        DynamicContext { value: None }
+        DynamicContext {
+            values: HashMap::new(),
+        }
     }
 
-    pub fn set<T: 'static>(&mut self, value: T) {
-        self.value = Some(Box::new(value));
+    pub fn set<T: 'static>(&mut self, key: &str, value: T) {
+        self.values.insert(key.to_owned(), Box::new(value));
     }
 
-    pub fn get<T: 'static>(&self) -> Option<&T> {
-        self.value.as_ref().and_then(|v| v.downcast_ref::<T>())
+    pub fn get<T: 'static>(&self, key: &str) -> Option<&T> {
+        self.values
+            .get(key)
+            .and_then(|value| value.downcast_ref::<T>())
     }
 
-    pub fn get_mut<T: 'static>(&mut self) -> Option<&mut T> {
-        self.value.as_mut().and_then(|v| v.downcast_mut::<T>())
+    pub fn get_mut<T: 'static>(&mut self, key: &str) -> Option<&mut T> {
+        self.values
+            .get_mut(key)
+            .and_then(|value| value.downcast_mut::<T>())
     }
 }
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct SetScrollingRegion(pub u16, pub u16);
