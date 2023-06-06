@@ -21,7 +21,7 @@ fn main(){
     ];
 
     // start the command loop with the provided commands
-    if let Err(e) = command_loop(&commands, None){
+    if let Err(e) = command_loop(&commands, &mut None){
         eprintln!("error running command loop: {}", e.to_string());
     }
 }
