@@ -99,6 +99,7 @@ impl ctCommand for SetScrollingAll {
 /// to maintain a state during subcalls if needed.
 pub fn command_loop(commands: &Vec<Command>, context: &mut DynamicContext) -> Result<(), Box<dyn Error>>{
     setup_screen()?;
+    let default= String::from(">> ");
 
     println!("info: type 'help' to for a list of commands");
     let help_str = build_help_str(&commands);
@@ -107,7 +108,8 @@ pub fn command_loop(commands: &Vec<Command>, context: &mut DynamicContext) -> Re
             eprintln!("error during screen setup: {}", err.to_string());
         }
         let mut rl = rustyline::Editor::<()>::new().unwrap();
-        match rl.readline(">> "){
+        let prompt = context.get::<String>("prompt").unwrap_or(&default);
+        match rl.readline(prompt){
             Ok(line)=>{
                 if line.is_empty(){continue}
 
